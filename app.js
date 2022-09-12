@@ -5,6 +5,7 @@ const morgan = require('morgan');
 const exphbs = require('express-handlebars');
 const passport = require('passport');
 const session = require('express-session');
+const MongoStore = require('connect-mongo');
 const connectDB = require('./config/db');
 
 //Load config
@@ -16,6 +17,10 @@ require('./config/passport')(passport);
 connectDB();
 
 const app = express();
+
+//Body parser
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json());
 
 // Logging
 //!Add the word .engine after expbhs
@@ -37,7 +42,10 @@ app.use(
     session({
         secret: 'keyboard cat',
         resave: false,
-        saveUninitialized: false
+        saveUninitialized: false,
+        store: MongoStore.create({
+            mongoUrl: process.env.MONGO_URI
+        })
     })
 );
 
@@ -51,8 +59,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Routes
 app.use('/', require('./routes/index'));
 app.use('/auth', require('./routes/auth'));
+app.use('/stories', require('./routes/stories'));
 
-// TIMESTAMP BOOKMARK 05:18:43
+// TIMESTAMP BOOKMARK P2 ~00:26:00
 
 const PORT = process.env.PORT || 8500;
 
